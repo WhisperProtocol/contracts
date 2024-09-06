@@ -2,7 +2,7 @@
 pragma solidity ^0.8.17;
 
 import "./MiMC5.sol";
-import "./ReentrancyGuard.sol";
+import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
 contract Whisper is ReentrancyGuard {
     address owner;

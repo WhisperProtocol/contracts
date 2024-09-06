@@ -5,7 +5,7 @@ const { buildModule } = require("@nomicfoundation/hardhat-ignition/modules");
 
 const amount = 1000000000000000000n;
 
-module.exports = buildModule("PoolEthModule", (m) => {
+module.exports = buildModule("WhisperModule", (m) => {
   // const unlockTime = m.getParameter("unlockTime", JAN_1ST_2030);
   // const lockedAmount = m.getParameter("lockedAmount", ONE_GWEI);
 
