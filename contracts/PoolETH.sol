@@ -36,12 +36,6 @@ contract PoolETH {
         kycHolders[_user] = _KYC;
     }
 
-    function returnFunds() public onlyOwner() payable{
-        address payable receiver = payable(lastSender);
-        (bool ok, ) = receiver.call{value: depositAmount}("");
-        require(ok, "Failed to send funds");
-    }
-
     function setFees(uint256 _fees) public onlyOwner() {
         fees = _fees;
     }
