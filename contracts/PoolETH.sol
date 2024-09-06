@@ -16,6 +16,7 @@ contract PoolETH {
 
     constructor(uint256 _depositAmount) {
         depositAmount = _depositAmount;
+        owner = msg.sender;
     }
 
     function safeDeposit() public payable {
