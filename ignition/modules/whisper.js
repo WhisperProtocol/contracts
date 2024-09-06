@@ -13,9 +13,17 @@ module.exports = buildModule("WhisperModule", (m) => {
   //   value: lockedAmount,
   // });
 
-  const pool = m.contract("PoolETH", [amount]);
+  const mimc5 = m.contract("MiMC5");
+
+  const verifier = m.contract("Verifier");
+
+  const whisper = m.contract("Whisper", [mimc5]);
   
-  return { pool };
+  const pool = m.contract("PoolETH", [amount, whisper, verifier]);
+
+  m.call(whisper, "allowCaller", [pool]);
+  
+  return { mimc5, verifier, whisper, pool };
 
   // return { lock };
 });
