@@ -42,7 +42,6 @@ contract PoolETH {
     function Deposit(uint _commitment) public payable {
         uint totalAmount = depositAmount + fees;
         require(msg.value == totalAmount, "Invalid deposit amount");
-        lastSender = msg.sender;
 
         whisper.addCommitment(_commitment);
     }
@@ -56,17 +55,17 @@ contract PoolETH {
     }
 
     function withdraw(
-        uint[2] calldata _proofA,
-        uint[2][2] calldata _proofB,
-        uint[2] calldata _proofC,
-        uint[1] calldata _publicSignals
+        uint[2] calldata _pA,
+        uint[2][2] calldata _pB,
+        uint[2] calldata _pC,
+        uint[1] calldata _pubSignals
     ) public {
         require(address(this).balance >= depositAmount, "Insufficient balance");
 
-        uint _nullifierHash = _publicSignals[0]
+        uint _nullifierHash = _pubSignals[0];
         uint _addr = uint256(uint160(msg.sender));
 
-        (bool verifyOk, ) = verifier.call(abi.encodeCall(IVerifier.verifyProof(_pA, _pB, _pC, [_nullifierHash, _addr]);))
+        (bool verifyOk, ) = verifier.call(abi.encodeCall(IVerifier.verifyProof, (_pA, _pB, _pC, [_nullifierHash, _addr])));
 
         require(verifyOk, "Invalid proof");
 

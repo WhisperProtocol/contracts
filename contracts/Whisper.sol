@@ -102,7 +102,7 @@ contract Whisper is ReentrancyGuard {
         nullifierHashes[_nullifierHash] = true;
     }
 
-    function allowCaller(address _caller, bool _value) onlyOwner() external {
+    function allowCaller(address _caller) onlyOwner() external {
         isAllowedCaller[_caller] = true;
     }
 }
