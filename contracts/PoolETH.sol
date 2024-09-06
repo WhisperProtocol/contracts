@@ -16,6 +16,7 @@ contract PoolETH {
 
     constructor(uint256 _depositAmount) {
         depositAmount = _depositAmount;
+        owner = msg.sender;
     }
 
     function safeDeposit() public payable {
@@ -33,12 +34,6 @@ contract PoolETH {
 
     function setKYC(address _user, address _KYC) public onlyOwner() {
         kycHolders[_user] = _KYC;
-    }
-
-    function returnFunds() public onlyOwner() payable{
-        address payable receiver = payable(lastSender);
-        (bool ok, ) = receiver.call{value: depositAmount}("");
-        require(ok, "Failed to send funds");
     }
 
     function setFees(uint256 _fees) public onlyOwner() {

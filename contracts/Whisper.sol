@@ -22,7 +22,7 @@ contract Whisper is ReentrancyGuard, Permissioned {
     uint public currentRootIndex;
     uint public nextLeafIndex;
     euint256 public newRoot;
-    address public handler;
+    address public owner;
 
     string[Total_Roots] private roots;
     mapping(uint8 => uint) lastLevelHash;
@@ -44,18 +44,18 @@ contract Whisper is ReentrancyGuard, Permissioned {
 
     event Deposit(euint256 root, uint[10] hashPairings, uint8[10] pairDirection);
 
-    modifier onlyHandler() {
-        require(msg.sender == handler, "Only handler can call this function");
+    modifier onlyOwner() {
+        require(msg.sender == owner, "Only owner can call this function");
         _;
     }
 
-    constructor(address _verifier, address _mimc5, address _handler) {
+    constructor(address _verifier, address _mimc5) {
         verifier = _verifier;
         mimc5 = MiMC5(_mimc5);
-        handler = _handler;
+        owner = msg.sender;
     }
 
-    function deposit(uint _commitment, Permission memory signature) onlyHandler external nonReentrant() {
+    function deposit(uint _commitment, Permission memory signature) onlyOwner() external nonReentrant() {
         require(!commitments[_commitment], "Commitment already exists");
         require(nextLeafIndex < 2**treeLevel, "Tree is full");
 
@@ -114,7 +114,7 @@ contract Whisper is ReentrancyGuard, Permissioned {
         uint[2] calldata _pC,
         address recipient,
         inEuint256 calldata encryptedNullifierHash
-    ) external onlyHandler() nonReentrant() {
+    ) external onlyOwner() nonReentrant() {
         euint256 nullifierHash = FHE.asEuint256(encryptedNullifierHash);
         
         require(!nullifierHashes[nullifierHash], "Nullifier hash already exists");
@@ -127,7 +127,7 @@ contract Whisper is ReentrancyGuard, Permissioned {
         nullifierHashes[nullifierHash] = true;
     }
 
-    function getAllRoots() external view onlyHandler() returns (string[Total_Roots] memory) {
+    function getAllRoots() external view returns (string[Total_Roots] memory) {
         return roots;
     }
 
