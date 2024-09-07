@@ -17,8 +17,6 @@ contract PoolETH {
     uint256 public depositAmount;
     uint256 public fees = 0.0001 ether;
 
-    mapping(address => address) public kycHolders;
-
     modifier onlyOwner() {
         require(msg.sender == owner, "Only handler can call this function");
         _;
@@ -31,23 +29,11 @@ contract PoolETH {
         owner = msg.sender;
     }
 
-    function safeDeposit(uint _commitment) public payable {
-        require(kycHolders[msg.sender] != address(0), "KYC not done");
-        uint totalAmount = depositAmount + fees;
-        require(msg.value == totalAmount, "Invalid deposit amount");
-
-        whisper.addCommitment(_commitment);
-    }
-
     function Deposit(uint _commitment) public payable {
         uint totalAmount = depositAmount + fees;
         require(msg.value == totalAmount, "Invalid deposit amount");
 
         whisper.addCommitment(_commitment);
-    }
-
-    function setKYC(address _user, address _KYC) public onlyOwner() {
-        kycHolders[_user] = _KYC;
     }
 
     function setFees(uint256 _fees) public onlyOwner() {
@@ -76,8 +62,4 @@ contract PoolETH {
         (bool ok, ) = target.call{value: depositAmount}("");
         require(ok, "Failed to send funds");
     } 
-
-    function isKYC(address _address) public view returns(bool) {
-        return kycHolders[_address] != address(0);
-    }
 }
