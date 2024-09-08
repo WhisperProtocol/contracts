@@ -10,6 +10,11 @@ module.exports = {
     holesky: {
       url: RPC_URL,
       accounts: [PRIVATE_KEY]
-    }
+    },
+    rootstockTestnet : {
+      url: "https://public-node.testnet.rsk.co",
+      chainId: 31,
+      accounts: [PRIVATE_KEY]
+    },
   }
 };
