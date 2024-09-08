@@ -4,11 +4,16 @@ pragma solidity ^0.8.20;
 import "./MiMC5.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
-contract Whisper is ReentrancyGuard {
-    address owner;
-    MiMC5 mimc5;
+interface IVerifier {
+    function verifyProof(uint[2] calldata _pA, uint[2][2] calldata _pB, uint[2] calldata _pC, uint[2] calldata _pubSignals) external view returns (bool);
+}
 
-    mapping(address => bool) public isAllowedCaller;
+contract Whisper is ReentrancyGuard {
+    address verifier;
+    address owner;
+    uint public depositAmount;
+    uint public fees = 0.0001 ether;
+    MiMC5 mimc5;
 
     // Tree Levels determine the total number of transactions that can occur in one tree, right now it's 2**10
     uint8 treeLevel = 10;
@@ -33,22 +38,21 @@ contract Whisper is ReentrancyGuard {
 
     event Deposit(uint256 root, uint[10] hashPairings, uint8[10] hashDirections);
 
-    modifier onlyAllowedCaller() {
-        require(isAllowedCaller[msg.sender], "Caller not allowed");
-        _;
-    }
-
     modifier onlyOwner() {
         require(msg.sender == owner, "Only owner can call this function");
         _;
     }
 
-    constructor(address _mimc5) {
+    constructor(address _mimc5, address _verifier, uint _depositAmount) {
         mimc5 = MiMC5(_mimc5);
+        verifier = _verifier;
+        depositAmount = _depositAmount;
         owner = msg.sender;
     }
 
-    function addCommitment(uint _commitment ) onlyAllowedCaller() external nonReentrant() {
+    function deposit(uint _commitment ) external payable nonReentrant() {
+        uint totalAmount = depositAmount + fees;
+        require(msg.value == totalAmount, "Invalid deposit amount");
         require(!commitments[_commitment], "Commitment already exists");
         require(nextLeafIndex < 2**treeLevel, "Tree is full");
 
@@ -94,15 +98,32 @@ contract Whisper is ReentrancyGuard {
         emit Deposit(newRoot, hashPairings, hashDirections);
     }
 
-    function addNullifierHash(
-        uint256 _nullifierHash
-    ) onlyAllowedCaller() external nonReentrant() {
+    function setFees(uint256 _fees) external onlyOwner() {
+        fees = _fees;
+    }
+
+    function withdraw(
+        uint[2] calldata _pA,
+        uint[2][2] calldata _pB,
+        uint[2] calldata _pC,
+        uint[1] calldata _pubSignals
+    ) public {
+        require(address(this).balance >= depositAmount, "Insufficient balance");
+
+        uint _nullifierHash = _pubSignals[0];
         require(!nullifierHashes[_nullifierHash], "Nullifier hash already exists");
 
-        nullifierHashes[_nullifierHash] = true;
-    }
+        uint _addr = uint256(uint160(msg.sender));
 
-    function allowCaller(address _caller) onlyOwner() external {
-        isAllowedCaller[_caller] = true;
-    }
+        (bool verifyOk, ) = verifier.call(abi.encodeCall(IVerifier.verifyProof, (_pA, _pB, _pC, [_nullifierHash, _addr])));
+
+        require(verifyOk, "Invalid proof"); 
+
+        nullifierHashes[_nullifierHash] = true;
+
+        address payable target = payable(msg.sender);
+
+        (bool ok, ) = target.call{value: depositAmount}("");
+        require(ok, "Failed to send funds");
+    } 
 }
