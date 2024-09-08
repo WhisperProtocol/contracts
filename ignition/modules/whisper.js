@@ -3,7 +3,7 @@ const { buildModule } = require("@nomicfoundation/hardhat-ignition/modules");
 // const JAN_1ST_2030 = 1893456000;
 // const ONE_GWEI = 1_000_000_000n;
 
-const amount = 1000000000000000n;
+const amount = 1000000000000n;
 
 module.exports = buildModule("WhisperModule", (m) => {
   // const unlockTime = m.getParameter("unlockTime", JAN_1ST_2030);
