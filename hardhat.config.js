@@ -16,10 +16,5 @@ module.exports = {
       chainId: 31,
       accounts: [PRIVATE_KEY]
     },
-    morphHolesky: {
-      url: "https://rpc-holesky.morphl2.io",
-      chainId: 2810,
-      accounts: [PRIVATE_KEY]
-    },
   }
 };
