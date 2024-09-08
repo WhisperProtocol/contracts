@@ -107,7 +107,7 @@ contract Whisper is ReentrancyGuard {
         uint[2][2] calldata _pB,
         uint[2] calldata _pC,
         uint[1] calldata _pubSignals
-    ) public {
+    ) public payable nonReentrant(){
         require(address(this).balance >= depositAmount, "Insufficient balance");
 
         uint _nullifierHash = _pubSignals[0];
